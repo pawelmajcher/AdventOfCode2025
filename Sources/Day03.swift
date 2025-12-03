@@ -1,25 +1,56 @@
 import Algorithms
 
-struct Day00: AdventDay {
-  // Save your data in a corresponding text file in the `Data` directory.
+struct Day03: AdventDay {
   var data: String
 
-  // Splits input data into its component parts and convert from string.
-  var entities: [[Int]] {
-    data.split(separator: "\n\n").map {
-      $0.split(separator: "\n").compactMap { Int($0) }
+  var batteryBanks: [[Int]] {
+    data.split(separator: "\n").map { bankString in
+      bankString.compactMap { $0.wholeNumberValue }
+    }.filter { !$0.isEmpty }
+  }
+
+  func part1() -> Int {
+    let maxJoltageFromBank = batteryBanks.map { bank in
+      let firstBatteryLookup = bank[0 ..< bank.endIndex-1]
+      let firstBatteryValue = firstBatteryLookup.max()!
+      let firstBatteryIndex = firstBatteryLookup.firstIndex(of: firstBatteryValue)!
+      
+      let secondBatteryLookup = bank.suffix(from: firstBatteryIndex + 1)
+      let secondBatteryValue = secondBatteryLookup.max()!
+      
+      return firstBatteryValue * 10 + secondBatteryValue
     }
+    
+    return maxJoltageFromBank.reduce(0, +)
   }
 
-  // Replace this with your solution for the first part of the day's challenge.
-  func part1() -> Any {
-    // Calculate the sum of the first set of input data
-    entities.first?.reduce(0, +) ?? 0
+  func part2() -> Int {
+    let maxJoltageFromBank = batteryBanks.map { bank in
+      var remainingBank = bank
+      var accumulatingJoltage: Int = 0
+      
+      for remainingDigits in (0 ..< 12).reversed() {
+        print(remainingBank)
+        let maxJoltageBattery = remainingBank.getMaxJoltageBattery(saving: remainingDigits)
+        accumulatingJoltage +=
+          maxJoltageBattery * (0..<remainingDigits).reduce(1) { value, _ in 10 * value }
+      }
+      
+      return accumulatingJoltage
+    }
+    
+    return maxJoltageFromBank.reduce(0, +)
   }
+}
 
-  // Replace this with your solution for the second part of the day's challenge.
-  func part2() -> Any {
-    // Sum the maximum entries in each set of data
-    entities.map { $0.max() ?? 0 }.reduce(0, +)
+extension Array where Element == Int {
+  mutating func getMaxJoltageBattery(saving remainingDigits: Int = 0) -> Int {
+    let batteryLookup = self[0 ..< self.endIndex - remainingDigits]
+    let batteryValue = batteryLookup.max()!
+    let batteryIndex = batteryLookup.firstIndex(of: batteryValue)!
+    
+    self.removeFirst(batteryIndex + 1)
+    
+    return batteryValue
   }
 }
