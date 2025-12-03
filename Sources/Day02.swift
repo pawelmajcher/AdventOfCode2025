@@ -14,12 +14,6 @@ struct Day02: AdventDay {
         return boundMin...boundMax
       }
   }
-  
-  var entities: [[Int]] {
-    data.split(separator: "\n\n").map {
-      $0.split(separator: "\n").compactMap { Int($0) }
-    }
-  }
 
   func part1() -> Int {
     let invalidNumbers = ranges.flatMap { range in
